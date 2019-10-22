@@ -1,0 +1,122 @@
+<html>
+	<head>
+		<meta charset="utf8"/>
+		<style>
+			#block-current {
+				display: none;
+				position: absolute;
+				top: 15%;
+				width: 50%;
+				left: 50%;
+				margin-left: -25%;
+				font-size: 40pt;
+				color: darkgreen;
+			}
+			.bg{
+				background: rgba(255, 255, 255, .65);
+				padding: 1em;
+				border: 1px dashed black;
+			}
+			#block-winner {
+				display: none;
+				color: darkred;
+			}
+		</style>
+	</head>
+	<body>
+	<p>The candidates is:</p>
+	<div><textarea id="candidates" rows="30" cols="80"></textarea></div>
+	<div><button id="rollup">Roll-up!</button><button id="clear">Hide the winner</button></div>
+	<div id="block-current">
+		<div class="bg">Current candidate is:<br />
+		<span id="candidate"></span><br />
+		Attempts remain: <span id="remain"></span>
+		<span id="block-winner">The winner is: <span id="winner"></span></span>
+		</div>
+	</div>
+	<p>Previous winners: </p>
+	<pre id="winners"></pre>
+
+	<script type="text/javascript">
+		(function() {
+			var defaultCandidates = ["Candidate One", "Candidate Two", "Candidate Three"];
+			var previous = [];
+			var rollupButton = document.getElementById("rollup");
+			var clearButton = document.getElementById("clear");
+			var list = document.getElementById("candidates");
+			var currentWinner = document.getElementById("winner");
+			var candidate = document.getElementById("candidate");
+			var candidateBlock = document.getElementById("block-current");
+			var winnerBlock = document.getElementById("block-winner");
+			var remainText = document.getElementById("remain");
+			var winnersText = document.getElementById("winners");
+			list.value = defaultCandidates.join("\n");
+
+			var candidates = [];
+			var remain = null;
+			var maxAttempts = null;
+
+			function getRandomInt(max) {
+				var random = Math.random();
+				var randomMultiplied = random * Math.floor(max);
+				var result = Math.floor(randomMultiplied);
+
+				console.log('random = ', random, 'multiplied = ', randomMultiplied, 'result', result);
+
+				return result;
+			}
+
+			var timer = function() {
+				if (remain === null) {
+					return;
+				}
+
+				remainText.innerText = `${remain} / ${maxAttempts}`;
+
+				var currentId = getRandomInt(candidates.length);
+
+				if (remain === 0) {
+					remain = null;
+					previous.push(candidates[currentId]);
+					candidate.innerText = candidates[currentId];
+					currentWinner.innerText = candidates[currentId];
+					candidates.splice(currentId, 1);
+					list.value = candidates.join("\n");
+					winnersText.innerText = previous.join("\n");
+					candidateBlock.style.display = "block";
+					winnerBlock.style.display = "block";
+					return;
+				}
+
+				candidateBlock.style.display = "block";
+				winnerBlock.style.display = "none";
+
+				candidate.innerText = candidates[currentId];
+				remain--;
+			};
+
+			setInterval(timer, 1000);
+
+			rollupButton.addEventListener("click", function () {
+				candidates = list.value.split("\n").filter(item => item.length > 0);
+				maxAttempts = getRandomInt(20) + 5; //minimum 5 attempts
+
+				if (candidates.length === 0) {
+					alert("You should enter at least one participant");
+					return;
+				}
+
+				currentWinner.innerText = "generating";
+				candidateBlock.style.display = "block";
+				remain = maxAttempts;
+			});
+
+			clearButton.addEventListener("click", function () {
+				candidateBlock.style.display = "none";
+				winnerBlock.style.display = "none";
+			});
+
+		}());
+	</script>
+	</body>
+</html>
